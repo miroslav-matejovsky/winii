@@ -4,12 +4,12 @@ package runtimes
 
 import "fmt"
 
-type AuditResult struct {
+type Insights struct {
 	VCRedistRuntimes []VCRedistRuntime
 	DotNetRuntimes   []DotNetRuntime
 }
 
-func DoAudit() (*AuditResult, error) {
+func DoAudit() (*Insights, error) {
 	vcRedist, err := DoVCRedistAudit()
 	if err != nil {
 		return nil, fmt.Errorf("failed to audit Visual C++ Redistributable runtimes: %w", err)
@@ -18,7 +18,7 @@ func DoAudit() (*AuditResult, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to audit .NET runtimes: %w", err)
 	}
-	return &AuditResult{
+	return &Insights{
 		VCRedistRuntimes: vcRedist,
 		DotNetRuntimes:   dotNet,
 	}, nil
