@@ -6,10 +6,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAudit(t *testing.T) {
-	auditResult, err := DoAudit()
+func TestProvideInsights(t *testing.T) {
+	insights, err := ProvideInsights()
 	require.NoError(t, err)
-	require.NotNil(t, auditResult)
-	require.NotNil(t, auditResult.VCRedistRuntimes)
-	require.NotNil(t, auditResult.DotNetRuntimes)
+	require.NotNil(t, insights)
+	require.NotNil(t, insights.VCRedistRuntimes)
+	require.NotNil(t, insights.DotNetRuntimes)
 }

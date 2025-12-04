@@ -6,8 +6,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestDotNetRuntimesAudit(t *testing.T) {
-	dotnet, err := DotNetRuntimesAuditResult()
+func TestDotNetRuntimesInsights(t *testing.T) {
+	dotnet, err := ProvideDotNetInsights()
 	require.NoError(t, err)
 	require.NotNil(t, dotnet)
 	for _, d := range dotnet {

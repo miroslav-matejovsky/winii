@@ -15,9 +15,9 @@ type DotNetRuntime struct {
 	Location string
 }
 
-// DotNetRuntimesAuditResult holds the results of auditing .NET runtimes.
+// ProvideDotNetInsights holds the insights about installed .NET runtimes.
 // It uses dotnet --list-runtimes to gather information about installed runtimes.
-func DotNetRuntimesAuditResult() ([]DotNetRuntime, error) {
+func ProvideDotNetInsights() ([]DotNetRuntime, error) {
 	// Check if dotnet command exists
 	if _, err := exec.LookPath("dotnet"); err != nil {
 		// dotnet not found, return empty list

@@ -15,11 +15,11 @@ type VCRedistRuntime struct {
 	Path         string
 }
 
-// DoVCRedistAudit audits the Windows registry for installed Visual C++ Redistributable runtimes.
-// It returns a slice of VcRedistRuntime structs or an error if the audit fails.
+// ProvideVCRedistInsights scans the Windows registry for installed Visual C++ Redistributable runtimes.
+// It returns a slice of VcRedistRuntime structs or an error if the scan fails.
 // This is equivalent to running the PowerShell command:
 // Get-ItemProperty -Path "HKLM:\SOFTWARE\WOW6432Node\Microsoft\VisualStudio\*\VC\Runtimes\*" | Format-Table
-func DoVCRedistAudit() ([]VCRedistRuntime, error) {
+func ProvideVCRedistInsights() ([]VCRedistRuntime, error) {
 	var vcRedistRuntimes []VCRedistRuntime
 	winreg := NewWinReg()
 	keyPath := `SOFTWARE\WOW6432Node\Microsoft\VisualStudio`
