@@ -12,8 +12,8 @@ import (
 )
 
 // Deps list all direct dependencies of the project, including available updates.
-func Deps()	error {
-		if err := sh.Run("go", "mod", "tidy"); err != nil {
+func Deps() error {
+	if err := sh.Run("go", "mod", "tidy"); err != nil {
 		return err
 	}
 	return sh.RunV("go", "list", "-u", "-m", "-f", "{{if not .Indirect}}{{.}}{{end}}", "all")
