@@ -7,16 +7,16 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-type FileTime struct {
+type FileTimestamps struct {
 	CreationTime   time.Time
 	LastAccessTime time.Time
 	LastWriteTime  time.Time
 }
 
-// getFileTime retrieves the creation, last access, and last write times of the file.
-func (wf *WinFileInfo) getFileTime() (*FileTime, error) {
+// GetFileTime retrieves the creation, last access, and last write times of the file.
+func GetFileTimestamps(path string) (*FileTimestamps, error) {
 	// Convert path to UTF-16
-	utf16Path, err := windows.UTF16PtrFromString(wf.path)
+	utf16Path, err := windows.UTF16PtrFromString(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to convert path to UTF-16: %w", err)
 	}
@@ -40,14 +40,14 @@ func (wf *WinFileInfo) getFileTime() (*FileTime, error) {
 		}
 	}()
 
-	var ctime, atime, wtime windows.Filetime
-	err = windows.GetFileTime(handle, &ctime, &atime, &wtime)
+	var createTime, accessTime, writeTime windows.Filetime
+	err = windows.GetFileTime(handle, &createTime, &accessTime, &writeTime)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get file time: %w", err)
 	}
-	return &FileTime{
-		CreationTime:   time.Unix(0, ctime.Nanoseconds()),
-		LastAccessTime: time.Unix(0, atime.Nanoseconds()),
-		LastWriteTime:  time.Unix(0, wtime.Nanoseconds()),
+	return &FileTimestamps{
+		CreationTime:   time.Unix(0, createTime.Nanoseconds()),
+		LastAccessTime: time.Unix(0, accessTime.Nanoseconds()),
+		LastWriteTime:  time.Unix(0, writeTime.Nanoseconds()),
 	}, nil
 }

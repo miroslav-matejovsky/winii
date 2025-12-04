@@ -4,7 +4,7 @@ import "fmt"
 
 func ProvideInsights() ([]ServiceDetails, error) {
 	svcManager := NewWinSvcManager()
-	defer svcManager.Disconnect()
+	defer func() { _ = svcManager.Disconnect() }()
 
 	services, err := svcManager.AllServices()
 	if err != nil {

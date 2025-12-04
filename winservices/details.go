@@ -126,7 +126,7 @@ func (s *WinSvcManager) GetServiceDetails(name string, includeFiles bool) (*Serv
 	if err != nil {
 		return nil, fmt.Errorf("failed to get file info for %v: %v", name, err)
 	}
-	fileTime, err := wf.GetFileTime()
+	fileTime, err := wf.GetFileTimestamps()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get file time for %v: %v", name, err)
 	}

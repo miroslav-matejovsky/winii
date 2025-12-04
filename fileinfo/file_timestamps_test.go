@@ -8,10 +8,9 @@ import (
 )
 
 func TestGetFileTime(t *testing.T) {
-	wf, err := NewWinFileInfo("C:\\Windows\\System32\\notepad.exe")
-	require.NoError(t, err)
+	path := "C:\\Windows\\System32\\notepad.exe"
 
-	ft, err := wf.GetFileTime()
+	ft, err := GetFileTimestamps(path)
 	require.NoError(t, err)
 
 	tenYearsAgo := time.Now().AddDate(-10, 0, 0)

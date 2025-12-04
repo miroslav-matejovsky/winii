@@ -30,8 +30,8 @@ func NewWinFileInfo(path string) (*WinFileInfo, error) {
 
 // GetFileTime retrieves the file time information for the file.
 // It returns a WinFileTime struct containing the file time information.
-func (wf *WinFileInfo) GetFileTime() (*FileTime, error) {
-	return wf.getFileTime()
+func (wf *WinFileInfo) GetFileTimestamps() (*FileTimestamps, error) {
+	return GetFileTimestamps(wf.path)
 }
 
 // GetVersions retrieves the file version information for the file.
