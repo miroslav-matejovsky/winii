@@ -12,8 +12,8 @@
 //
 // Example
 //
-//	mgr := winservicedetail.NewWinSvcManager()
-//	defer mgr.Disconnect()
+//	mgr := winservices.NewWinSvcManager()
+//	defer func() { _ = mgr.Disconnect() }()
 //
 //	exists, err := mgr.ServiceExists("MyService")
 //	if err != nil {

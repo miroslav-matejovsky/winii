@@ -20,7 +20,7 @@ func (s *WinSvcManager) AllServices() ([]ServiceDetails, error) {
 	}
 	var serviceDetails []ServiceDetails
 	for _, serviceName := range services {
-		details, err := s.GetServiceDetails(serviceName, false)
+		details, err := s.GetServiceDetails(serviceName)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get details for service %s: %w", serviceName, err)
 		}

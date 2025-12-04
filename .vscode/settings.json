@@ -17,6 +17,7 @@
   "Redistributables",
   "stretchr",
   "winii",
-  "winservices"
+  "winservices",
+  "wuauserv"
  ]
 }

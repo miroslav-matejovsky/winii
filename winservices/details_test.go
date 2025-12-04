@@ -13,7 +13,7 @@ func TestNotExistingService(t *testing.T) {
 	manager := NewWinSvcManager()
 
 	// Test with a non-existing service name
-	d, err := manager.GetServiceDetails("NonExistingService1234", true)
+	d, err := manager.GetServiceDetails("NonExistingService1234")
 	require.ErrorIs(t, err, ErrServiceNotFound)
 	require.Nil(t, d)
 }
@@ -22,8 +22,7 @@ func TestServiceDetails(t *testing.T) {
 	manager := NewWinSvcManager()
 
 	// wuauserv is the Windows Update service, and it should be present on all Windows systems.
-	includeFiles := false
-	d, err := manager.GetServiceDetails("wuauserv", includeFiles)
+	d, err := manager.GetServiceDetails("wuauserv")
 	require.NoError(t, err)
 	assert.Equal(t, "wuauserv", d.Name)
 	assert.Equal(t, "Windows Update", d.DisplayName)
@@ -46,7 +45,7 @@ func TestServiceDetails(t *testing.T) {
 	assert.NotEqual(t, time.Time{}, executableFile.CreationTime)
 	assert.NotEqual(t, time.Time{}, executableFile.LastAccessTime)
 	assert.NotEqual(t, time.Time{}, executableFile.LastWriteTime)
-	assert.Empty(t, d.Executable.ConfigFiles)
+	assert.Empty(t, d.Executable.ConfigFiles, "C:\\Windows	is skipped for config files collection")
 
 	assert.Equal(t, "", d.Recovery.Command)
 	assert.Equal(t, "Restart", d.Recovery.FirstFailure)

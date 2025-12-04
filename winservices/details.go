@@ -2,6 +2,7 @@ package winservices
 
 import (
 	"fmt"
+	"log/slog"
 	"path/filepath"
 	"time"
 
@@ -55,7 +56,7 @@ type ServiceRecovery struct {
 }
 
 // GetServiceDetails retrieves detailed information about a Windows service by its name.
-func (s *WinSvcManager) GetServiceDetails(name string, includeFiles bool) (*ServiceDetails, error) {
+func (s *WinSvcManager) GetServiceDetails(name string) (*ServiceDetails, error) {
 	if err := s.Connect(); err != nil {
 		return nil, err
 	}
@@ -131,14 +132,10 @@ func (s *WinSvcManager) GetServiceDetails(name string, includeFiles bool) (*Serv
 		return nil, fmt.Errorf("failed to get file time for %v: %v", name, err)
 	}
 
-	var configFiles []ServiceConfigFile
-	if includeFiles {
-		executableDir := filepath.Dir(executable)
-		configFiles, err = collectServiceConfigFiles(executableDir)
-		// Non-fatal error
-		if err != nil {
-			configFiles = nil
-		}
+	executableDir := filepath.Dir(executable)
+	configFiles, err := collectServiceConfigFiles(executableDir)
+	if err != nil {
+		slog.Warn("not all config files collected", "service", name, "error", err)
 	}
 
 	return &ServiceDetails{
