@@ -1,0 +1,25 @@
+{
+ "window.title": "${rootName}",
+ "gopls": {
+  "standaloneTags": [
+   "ignore",
+   "mage"
+  ]
+ },
+ "cSpell.words": [
+  "bizone",
+  "Filetime",
+  "fileversion",
+  "iface",
+  "magefile",
+  "matejovsky",
+  "miroslav",
+  "Redist",
+  "Redistributables",
+  "stretchr",
+  "winii",
+  "winservices",
+  "winver",
+  "wuauserv"
+ ]
+}
