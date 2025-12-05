@@ -5,17 +5,21 @@ import (
 	"github.com/miroslav-matejovsky/winii/winservices"
 )
 
+type InsightsOptions struct {
+	WinServiceOptions winservices.InventoryInsightOption
+}
+
 type Result struct {
 	Runtimes        runtimes.Insights
 	WindowsServices []winservices.ServiceDetails
 }
 
-func ProvideInsights() (*Result, error) {
+func ProvideInsights(options InsightsOptions) (*Result, error) {
 	runtimeInsights, err := runtimes.ProvideInsights()
 	if err != nil {
 		return nil, err
 	}
-	services, err := winservices.ProvideInsights()
+	services, err := winservices.ProvideInsights(options.WinServiceOptions)
 	if err != nil {
 		return nil, err
 	}

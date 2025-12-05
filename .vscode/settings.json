@@ -18,6 +18,7 @@
   "stretchr",
   "winii",
   "winservices",
+  "winver",
   "wuauserv"
  ]
 }

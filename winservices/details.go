@@ -68,16 +68,21 @@ func (s *WinSvcManager) GetServiceDetails(name string) (*ServiceDetails, error) 
 	if !exists {
 		return nil, ErrServiceNotFound
 	}
+	emptyServiceDetails := &ServiceDetails{
+		Name: name,
+	}
 	service, err := s.mgr.OpenService(name)
 	if err != nil {
-		return nil, fmt.Errorf("could not open service: %w", err)
+		slog.Warn("could not open service", "service", name, "error", err)
+		return emptyServiceDetails, nil
 	}
 	defer func() { _ = service.Close() }()
 
 	// Get service configuration
 	config, err := service.Config()
 	if err != nil {
-		return nil, fmt.Errorf("could not get service configuration: %w", err)
+		slog.Warn("could not get service configuration", "service", name, "error", err)
+		return emptyServiceDetails, nil
 	}
 
 	// Get current status
@@ -123,9 +128,13 @@ func (s *WinSvcManager) GetServiceDetails(name string) (*ServiceDetails, error) 
 	if err != nil {
 		return nil, fmt.Errorf("failed to get win file info for %v: %v", name, err)
 	}
+	var version, productionVersion string
 	versions, err := wf.GetVersions()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get file info for %v: %v", name, err)
+		slog.Warn("could not get file versions", "service", name, "error", err)
+	} else {
+		version = versions.FileVersion.String()
+		productionVersion = versions.ProductVersion.String()
 	}
 	fileTime, err := wf.GetFileTimestamps()
 	if err != nil {
@@ -164,8 +173,8 @@ func (s *WinSvcManager) GetServiceDetails(name string) (*ServiceDetails, error) 
 		Executable: ServiceExecutable{
 			ExecutableFile: ExecutableFile{
 				Path:           executable,
-				Version:        versions.FileVersion.String(),
-				ProductVersion: versions.ProductVersion.String(),
+				Version:        version,
+				ProductVersion: productionVersion,
 				CreationTime:   fileTime.CreationTime,
 				LastAccessTime: fileTime.LastAccessTime,
 				LastWriteTime:  fileTime.LastWriteTime,

@@ -47,7 +47,7 @@ func (wf *WinFileInfo) GetVersions() (*Versions, error) {
 // GetFixedFileInfo retrieves the fixed file information for the file.
 // It returns a windows.VS_FIXEDFILEINFO struct containing the fixed file information.
 func (wf *WinFileInfo) GetFixedFileInfo() (*windows.VS_FIXEDFILEINFO, error) {
-	winver, err := initWinVer(wf.path)
+	winver, err := newWinVer(wf.path)
 	if err != nil {
 		return nil, err
 	}

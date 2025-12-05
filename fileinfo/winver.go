@@ -12,7 +12,7 @@ type winver struct {
 	data        []byte
 }
 
-func initWinVer(filePath string) (*winver, error) {
+func newWinVer(filePath string) (*winver, error) {
 
 	var zHandle windows.Handle
 	// https://learn.microsoft.com/en-us/windows/win32/api/winver/nf-winver-getfileversioninfosizea
