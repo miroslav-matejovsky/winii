@@ -10,5 +10,5 @@ func TestNetworkInsights(t *testing.T) {
 	insights, err := ProvideNetworkInsights()
 	require.NoError(t, err)
 	require.NotNil(t, insights)
-	t.Log(insights)
+	t.Logf("Network Insights: %+v", insights)
 }
