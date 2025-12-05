@@ -22,12 +22,11 @@ var skipDirs = []string{
 }
 
 type ServiceConfigFile struct {
-	Path     string
-	Contents string
-
-	CreationTime   time.Time
-	LastAccessTime time.Time
-	LastWriteTime  time.Time
+	Path           string    // Path is the full path to the configuration file.
+	Contents       string    // Contents holds the text content of the configuration file.
+	CreationTime   time.Time // CreationTime is when the file was created.
+	LastAccessTime time.Time // LastAccessTime is when the file was last accessed.
+	LastWriteTime  time.Time // LastWriteTime is when the file was last modified.
 }
 
 func (s ServiceConfigFile) String() string {
