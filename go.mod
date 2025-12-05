@@ -9,9 +9,12 @@ require (
 	golang.org/x/sys v0.38.0
 )
 
+require github.com/go-ole/go-ole v1.2.6 // indirect
+
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/yusufpapurcu/wmi v1.2.4
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

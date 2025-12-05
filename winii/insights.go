@@ -1,4 +1,4 @@
-package inventory
+package winii
 
 import (
 	"github.com/miroslav-matejovsky/winii/runtimes"
