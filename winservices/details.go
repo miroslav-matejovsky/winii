@@ -2,7 +2,6 @@ package winservices
 
 import (
 	"fmt"
-	"log/slog"
 	"path/filepath"
 	"time"
 
@@ -14,7 +13,10 @@ import (
 )
 
 type ServiceDetails struct {
-	Name             string
+	Name string // Name of the service, always populated
+
+	CollectionError error // Error encountered during collection, if any
+
 	DisplayName      string
 	Description      string
 	PathToExecutable string
@@ -68,120 +70,136 @@ func (s *WinSvcManager) GetServiceDetails(name string) (*ServiceDetails, error) 
 	if !exists {
 		return nil, ErrServiceNotFound
 	}
-	emptyServiceDetails := &ServiceDetails{
+	details := &ServiceDetails{
 		Name: name,
 	}
 	service, err := s.mgr.OpenService(name)
 	if err != nil {
-		slog.Warn("could not open service", "service", name, "error", err)
-		return emptyServiceDetails, nil
+		details.CollectionError = err
+		return details, nil
 	}
 	defer func() { _ = service.Close() }()
 
 	// Get service configuration
 	config, err := service.Config()
 	if err != nil {
-		slog.Warn("could not get service configuration", "service", name, "error", err)
-		return emptyServiceDetails, nil
+		details.CollectionError = err
+	} else {
+		details.DisplayName = config.DisplayName
+		details.Description = config.Description
+		details.PathToExecutable = config.BinaryPathName
+		details.StartupType = startTypeToString(config.StartType)
+		details.ServiceType = serviceTypeToString(config.ServiceType)
+		details.ErrorControl = errorControlToString(config.ErrorControl)
+		details.Dependencies = config.Dependencies
+		details.ServiceStartName = config.ServiceStartName
+		details.DelayedAutoStart = config.DelayedAutoStart
 	}
 
 	// Get current status
 	status, err := service.Query()
 	if err != nil {
-		return nil, fmt.Errorf("could not query service: %w", err)
+		if details.CollectionError == nil {
+			details.CollectionError = err
+		}
+	} else {
+		details.ServiceStatus = stateToString(status.State)
 	}
 
 	// Get service recovery options
 	recoveryActions, err := service.RecoveryActions()
 	if err != nil {
-		return nil, fmt.Errorf("could not get service recovery actions: %w", err)
-	}
-
-	recoveryDetails := make([]string, 3)
-	recoveryDelays := make([]time.Duration, 3)
-	moreThan3RecoveryActions := false
-	for i, action := range recoveryActions {
-		if i >= 3 {
-			moreThan3RecoveryActions = true
-			break
+		if details.CollectionError == nil {
+			details.CollectionError = err
 		}
-		recoveryDetails[i] = recoverActionToString(action.Type)
-		recoveryDelays[i] = action.Delay
-	}
-
-	resetSeconds, err := service.ResetPeriod()
-	if err != nil {
-		return nil, fmt.Errorf("could not get service reset period: %w", err)
-	}
-
-	recoveryCommand, err := service.RecoveryCommand()
-	if err != nil {
-		return nil, fmt.Errorf("could not get service recovery command: %w", err)
-	}
-
-	executable, err := findServiceExecutable(config.BinaryPathName)
-	if err != nil {
-		return nil, err
-	}
-
-	wf, err := fi.NewWinFileInfo(executable)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get win file info for %v: %v", name, err)
-	}
-	var version, productionVersion string
-	versions, err := wf.GetVersions()
-	if err != nil {
-		slog.Warn("could not get file versions", "service", name, "error", err)
 	} else {
-		version = versions.FileVersion.String()
-		productionVersion = versions.ProductVersion.String()
-	}
-	fileTime, err := wf.GetFileTimestamps()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get file time for %v: %v", name, err)
+		recoveryDetails := make([]string, 3)
+		recoveryDelays := make([]time.Duration, 3)
+		moreThan3RecoveryActions := false
+		for i, action := range recoveryActions {
+			if i >= 3 {
+				moreThan3RecoveryActions = true
+				break
+			}
+			recoveryDetails[i] = recoverActionToString(action.Type)
+			recoveryDelays[i] = action.Delay
+		}
+
+		resetSeconds, err := service.ResetPeriod()
+		if err != nil {
+			if details.CollectionError == nil {
+				details.CollectionError = err
+			}
+		} else {
+			details.Recovery.ResetFailCountAfter = time.Duration(resetSeconds) * time.Second
+		}
+
+		recoveryCommand, err := service.RecoveryCommand()
+		if err != nil {
+			if details.CollectionError == nil {
+				details.CollectionError = err
+			}
+		} else {
+			details.Recovery.Command = recoveryCommand
+		}
+
+		details.Recovery.FirstFailure = recoveryDetails[0]
+		details.Recovery.FirstFailureAfter = recoveryDelays[0]
+		details.Recovery.SecondFailure = recoveryDetails[1]
+		details.Recovery.SecondFailureAfter = recoveryDelays[1]
+		details.Recovery.SubsequentFailures = recoveryDetails[2]
+		details.Recovery.SubsequentFailuresAfter = recoveryDelays[2]
+		details.Recovery.MoreThan3Actions = moreThan3RecoveryActions
 	}
 
-	executableDir := filepath.Dir(executable)
-	configFiles, err := collectServiceConfigFiles(executableDir)
-	if err != nil {
-		slog.Warn("not all config files collected", "service", name, "error", err)
+	// Collect executable information if PathToExecutable is available
+	if details.PathToExecutable != "" {
+		executable, err := findServiceExecutable(details.PathToExecutable)
+		if err != nil {
+			if details.CollectionError == nil {
+				details.CollectionError = err
+			}
+		} else {
+			details.Executable.ExecutableFile.Path = executable
+			wf, err := fi.NewWinFileInfo(executable)
+			if err != nil {
+				if details.CollectionError == nil {
+					details.CollectionError = err
+				}
+			} else {
+				versions, err := wf.GetVersions()
+				if err != nil {
+					if details.CollectionError == nil {
+						details.CollectionError = err
+					}
+				} else {
+					details.Executable.ExecutableFile.Version = versions.FileVersion.String()
+					details.Executable.ExecutableFile.ProductVersion = versions.ProductVersion.String()
+				}
+				fileTime, err := wf.GetFileTimestamps()
+				if err != nil {
+					if details.CollectionError == nil {
+						details.CollectionError = err
+					}
+				} else {
+					details.Executable.ExecutableFile.CreationTime = fileTime.CreationTime
+					details.Executable.ExecutableFile.LastAccessTime = fileTime.LastAccessTime
+					details.Executable.ExecutableFile.LastWriteTime = fileTime.LastWriteTime
+				}
+			}
+			executableDir := filepath.Dir(executable)
+			configFiles, err := collectServiceConfigFiles(executableDir)
+			if err != nil {
+				if details.CollectionError == nil {
+					details.CollectionError = err
+				}
+			} else {
+				details.Executable.ConfigFiles = configFiles
+			}
+		}
 	}
 
-	return &ServiceDetails{
-		Name:             name,
-		DisplayName:      config.DisplayName,
-		Description:      config.Description,
-		PathToExecutable: config.BinaryPathName,
-		StartupType:      startTypeToString(config.StartType),
-		ServiceStatus:    stateToString(status.State),
-		ServiceType:      serviceTypeToString(config.ServiceType),
-		ErrorControl:     errorControlToString(config.ErrorControl),
-		Dependencies:     config.Dependencies,
-		ServiceStartName: config.ServiceStartName,
-		DelayedAutoStart: config.DelayedAutoStart,
-		Recovery: ServiceRecovery{
-			Command:                 recoveryCommand,
-			FirstFailure:            recoveryDetails[0],
-			FirstFailureAfter:       recoveryDelays[0],
-			SecondFailure:           recoveryDetails[1],
-			SecondFailureAfter:      recoveryDelays[1],
-			SubsequentFailures:      recoveryDetails[2],
-			SubsequentFailuresAfter: recoveryDelays[2],
-			MoreThan3Actions:        moreThan3RecoveryActions,
-			ResetFailCountAfter:     time.Duration(resetSeconds) * time.Second,
-		},
-		Executable: ServiceExecutable{
-			ExecutableFile: ExecutableFile{
-				Path:           executable,
-				Version:        version,
-				ProductVersion: productionVersion,
-				CreationTime:   fileTime.CreationTime,
-				LastAccessTime: fileTime.LastAccessTime,
-				LastWriteTime:  fileTime.LastWriteTime,
-			},
-			ConfigFiles: configFiles,
-		},
-	}, nil
+	return details, nil
 }
 
 func startTypeToString(startType uint32) string {
