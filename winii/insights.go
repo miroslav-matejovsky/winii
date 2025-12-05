@@ -5,6 +5,7 @@ import (
 
 	"github.com/miroslav-matejovsky/winii/network"
 	"github.com/miroslav-matejovsky/winii/runtimes"
+	"github.com/miroslav-matejovsky/winii/system"
 	"github.com/miroslav-matejovsky/winii/winservices"
 )
 
@@ -12,28 +13,34 @@ type InsightsOptions struct {
 	WinServiceOptions winservices.InventoryInsightOption
 }
 
-type Result struct {
+type Insights struct {
+	System          system.Insights
 	Runtimes        runtimes.Insights
 	Network         network.Insights
 	WindowsServices []winservices.ServiceDetails
 }
 
-func ProvideInsights(options InsightsOptions) (*Result, error) {
+func ProvideInsights(options InsightsOptions) (*Insights, error) {
+	systemInsights, err := system.GetSystemInsights()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get system insights: %w", err)
+	}
 	runtimeInsights, err := runtimes.ProvideInsights()
 	if err != nil {
 		return nil, fmt.Errorf("failed to provide runtimes insights: %w", err)
 	}
-	services, err := winservices.ProvideInsights(options.WinServiceOptions)
+	servicesInsights, err := winservices.ProvideInsights(options.WinServiceOptions)
 	if err != nil {
 		return nil, fmt.Errorf("failed to provide windows services insights: %w", err)
 	}
-	network, err := network.ProvideNetworkInsights()
+	networkInsights, err := network.ProvideNetworkInsights()
 	if err != nil {
 		return nil, fmt.Errorf("failed to provide network insights: %w", err)
 	}
-	return &Result{
+	return &Insights{
+		System:          *systemInsights,
 		Runtimes:        *runtimeInsights,
-		Network:         *network,
-		WindowsServices: services,
+		Network:         *networkInsights,
+		WindowsServices: servicesInsights,
 	}, nil
 }
