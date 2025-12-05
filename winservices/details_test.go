@@ -24,7 +24,7 @@ func TestServiceDetails(t *testing.T) {
 	// wuauserv is the Windows Update service, and it should be present on all Windows systems.
 	d, err := manager.GetServiceDetails("wuauserv")
 	require.NoError(t, err)
-	assert.Equal(t, "wuauserv", d.Name)
+	assert.Equal(t, "wuauserv", d.ServiceName)
 	assert.Equal(t, "Windows Update", d.DisplayName)
 	assert.Equal(t, "Enables the detection, download, and installation of updates for Windows and other programs. If this service is disabled, users of this computer will not be able to use Windows Update or its automatic updating feature, and programs will not be able to use the Windows Update Agent (WUA) API.", d.Description)
 	assert.Equal(t, "c:\\windows\\system32\\svchost.exe -k netsvcs -p", strings.ToLower(d.PathToExecutable))

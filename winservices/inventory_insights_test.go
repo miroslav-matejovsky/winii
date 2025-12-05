@@ -31,5 +31,5 @@ func TestProvideInsightsWithFilter(t *testing.T) {
 	)
 	require.NoError(t, err)
 	require.Len(t, insight, 1)
-	require.Equal(t, "wuauserv", insight[0].Name)
+	require.Equal(t, "wuauserv", insight[0].ServiceName)
 }

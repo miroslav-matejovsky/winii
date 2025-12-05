@@ -13,7 +13,7 @@ import (
 )
 
 type ServiceDetails struct {
-	Name string // Name of the service, always populated
+	ServiceName string // Name of the service, always populated
 
 	CollectionError error // Error encountered during collection, if any
 
@@ -71,7 +71,7 @@ func (s *WinSvcManager) GetServiceDetails(name string) (*ServiceDetails, error) 
 		return nil, ErrServiceNotFound
 	}
 	details := &ServiceDetails{
-		Name: name,
+		ServiceName: name,
 	}
 	service, err := s.mgr.OpenService(name)
 	if err != nil {

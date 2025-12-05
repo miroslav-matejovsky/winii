@@ -7,6 +7,15 @@ import (
 	"strings"
 )
 
+const (
+	// DotNetAspNetCoreApp represents the ASP.NET Core runtime.
+	DotNetAspNetCoreApp = "Microsoft.AspNetCore.App"
+	// DotNetCoreApp represents the .NET Core runtime.
+	DotNetCoreApp = "Microsoft.NETCore.App"
+	// DotNetWindowsDesktopApp represents the Windows Desktop runtime.
+	DotNetWindowsDesktopApp = "Microsoft.WindowsDesktop.App"
+)
+
 // DotNetRuntime represents a .NET runtime installation on a Windows system.
 type DotNetRuntime struct {
 	// Full name of the runtime, one of "Microsoft.AspNetCore.App", "Microsoft.NETCore.App", "Microsoft.WindowsDesktop.App"
