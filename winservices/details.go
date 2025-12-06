@@ -43,8 +43,8 @@ type ServiceDetails struct {
 }
 
 type ServiceExecutable struct {
-	ExecutableFile ExecutableFile      // ExecutableFile holds information about the main executable file.
-	ConfigFiles    []ServiceConfigFile // ConfigFiles lists configuration files associated with the service.
+	ExecutableFile ExecutableFile // ExecutableFile holds information about the main executable file.
+	ConfigFiles    []ConfigFile   // ConfigFiles lists configuration files associated with the service.
 }
 
 type ExecutableFile struct {
