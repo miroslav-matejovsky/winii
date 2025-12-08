@@ -44,7 +44,7 @@ func TestCollectServiceConfigFiles_Success(t *testing.T) {
 
 	found := make(map[string]string, len(out))
 	for _, cf := range out {
-		found[cf.Path] = cf.Contents
+		found[cf.AbsolutePath] = cf.Contents
 	}
 
 	for p, want := range expected {

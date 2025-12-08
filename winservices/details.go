@@ -13,48 +13,59 @@ import (
 )
 
 type ServiceDetails struct {
-	Name string // Name of the service, always populated
+	ServiceName string // Name of the service, always populated
 
 	CollectionError error // Error encountered during collection, if any
 
-	DisplayName      string
-	Description      string
-	PathToExecutable string
-	StartupType      string
-	ServiceStatus    string
-	ServiceType      string
-	ErrorControl     string
-	Dependencies     []string
-	ServiceStartName string
-	DelayedAutoStart bool
-	Executable       ServiceExecutable
-	Recovery         ServiceRecovery
+	DisplayName string // DisplayName is the human-readable name of the service.
+
+	Description string // Description provides a brief description of the service.
+
+	PathToExecutable string // PathToExecutable is the full path to the service's executable.
+
+	StartupType string // StartupType indicates how the service is started (e.g., "auto", "manual").
+
+	ServiceStatus string // ServiceStatus shows the current status of the service (e.g., "running", "stopped").
+
+	ServiceType string // ServiceType describes the type of service (e.g., "win32_own_process").
+
+	ErrorControl string // ErrorControl specifies the action taken on failure (e.g., "normal", "severe").
+
+	Dependencies []string // Dependencies lists the names of services this service depends on.
+
+	ServiceStartName string // ServiceStartName is the account name under which the service runs.
+
+	DelayedAutoStart bool // DelayedAutoStart indicates if the service starts with a delay on boot.
+
+	Executable ServiceExecutable // Executable contains details about the service's executable and config files.
+
+	Recovery ServiceRecovery // Recovery defines the recovery actions for service failures.
 }
 
 type ServiceExecutable struct {
-	ExecutableFile ExecutableFile
-	ConfigFiles    []ServiceConfigFile
+	ExecutableFile ExecutableFile // ExecutableFile holds information about the main executable file.
+	ConfigFiles    []ConfigFile   // ConfigFiles lists configuration files associated with the service.
 }
 
 type ExecutableFile struct {
-	Path           string
-	Version        string
-	ProductVersion string
-	CreationTime   time.Time
-	LastAccessTime time.Time
-	LastWriteTime  time.Time
+	Path           string    // Path is the full path to the executable file.
+	Version        string    // Version is the file version of the executable.
+	ProductVersion string    // ProductVersion is the product version of the executable.
+	CreationTime   time.Time // CreationTime is when the file was created.
+	LastAccessTime time.Time // LastAccessTime is when the file was last accessed.
+	LastWriteTime  time.Time // LastWriteTime is when the file was last modified.
 }
 
 type ServiceRecovery struct {
-	Command                 string
-	FirstFailure            string
-	FirstFailureAfter       time.Duration
-	SecondFailure           string
-	SecondFailureAfter      time.Duration
-	SubsequentFailures      string
-	SubsequentFailuresAfter time.Duration
-	MoreThan3Actions        bool
-	ResetFailCountAfter     time.Duration
+	Command                 string        // Command is the command to run on failure.
+	FirstFailure            string        // FirstFailure is the action for the first failure.
+	FirstFailureAfter       time.Duration // FirstFailureAfter is the delay before the first failure action.
+	SecondFailure           string        // SecondFailure is the action for the second failure.
+	SecondFailureAfter      time.Duration // SecondFailureAfter is the delay before the second failure action.
+	SubsequentFailures      string        // SubsequentFailures is the action for subsequent failures.
+	SubsequentFailuresAfter time.Duration // SubsequentFailuresAfter is the delay before subsequent failure actions.
+	MoreThan3Actions        bool          // MoreThan3Actions indicates if more than 3 actions are configured.
+	ResetFailCountAfter     time.Duration // ResetFailCountAfter is the time after which the failure count resets.
 }
 
 // GetServiceDetails retrieves detailed information about a Windows service by its name.
@@ -71,7 +82,7 @@ func (s *WinSvcManager) GetServiceDetails(name string) (*ServiceDetails, error) 
 		return nil, ErrServiceNotFound
 	}
 	details := &ServiceDetails{
-		Name: name,
+		ServiceName: name,
 	}
 	service, err := s.mgr.OpenService(name)
 	if err != nil {

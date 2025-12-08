@@ -21,24 +21,23 @@ var skipDirs = []string{
 	"c:\\windows",
 }
 
-type ServiceConfigFile struct {
-	Path     string
-	Contents string
-
-	CreationTime   time.Time
-	LastAccessTime time.Time
-	LastWriteTime  time.Time
+type ConfigFile struct {
+	AbsolutePath   string    // AbsolutePath is the absolute full path to the configuration file.
+	Contents       string    // Contents holds the text content of the configuration file.
+	CreationTime   time.Time // CreationTime is when the file was created.
+	LastAccessTime time.Time // LastAccessTime is when the file was last accessed.
+	LastWriteTime  time.Time // LastWriteTime is when the file was last modified.
 }
 
-func (s ServiceConfigFile) String() string {
-	return s.Path
+func (s ConfigFile) String() string {
+	return s.AbsolutePath
 }
 
 // collectServiceConfigFiles walks the provided directory, finds files with known
 // configuration extensions, reads their contents and returns a slice of ServiceConfigFile.
 // The dir parameter must point to an existing directory.
 // Returns an error if dir is empty, does not exist, is not a directory, or if reading files fails.
-func collectServiceConfigFiles(dir string) ([]ServiceConfigFile, error) {
+func collectServiceConfigFiles(dir string) ([]ConfigFile, error) {
 	if dir == "" {
 		return nil, fmt.Errorf("dir is empty")
 	}
@@ -59,11 +58,11 @@ func collectServiceConfigFiles(dir string) ([]ServiceConfigFile, error) {
 	// Check if the directory is a system directory to skip
 	for _, skip := range skipDirs {
 		if strings.HasPrefix(normalizedDir, skip) {
-			return []ServiceConfigFile{}, nil
+			return []ConfigFile{}, nil
 		}
 	}
 
-	var configFiles []ServiceConfigFile
+	var configFiles []ConfigFile
 	var firstError error
 
 	err = filepath.Walk(dir, func(path string, info os.FileInfo, walkErr error) error {
@@ -93,8 +92,15 @@ func collectServiceConfigFiles(dir string) ([]ServiceConfigFile, error) {
 					}
 					return nil
 				}
-				configFiles = append(configFiles, ServiceConfigFile{
-					Path:           path,
+				absPath, err := filepath.Abs(path)
+				if err != nil {
+					if firstError == nil {
+						firstError = fmt.Errorf("failed to get absolute path for %q: %w", path, err)
+					}
+					return nil
+				}
+				configFiles = append(configFiles, ConfigFile{
+					AbsolutePath:   absPath,
 					Contents:       string(data),
 					CreationTime:   timestamps.CreationTime,
 					LastAccessTime: timestamps.LastAccessTime,
