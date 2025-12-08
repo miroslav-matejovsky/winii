@@ -8,9 +8,9 @@ import (
 	"github.com/miroslav-matejovsky/winii/winservices"
 )
 
-// ExampleProvideInventoryInsight demonstrates how to gather inventory insights
+// ExampleProvideInsights demonstrates how to gather inventory insights
 // with custom options, filtering Windows services by name.
-func ExampleProvideInventoryInsight() {
+func ExampleProvideInsights() {
 	options := InsightsOptions{
 		EnableSystem:          true,
 		EnableRuntimes:        true,
@@ -20,7 +20,7 @@ func ExampleProvideInventoryInsight() {
 			WinServiceNameRegex: regexp.MustCompile(".*service.*"),
 		},
 	}
-	insights, err := ProvideInventoryInsight(options)
+	insights, err := ProvideInsights(options)
 	if err != nil {
 		log.Fatal(err)
 	}

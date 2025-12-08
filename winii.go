@@ -3,7 +3,7 @@
 // This package offers a high-level API to gather comprehensive insights about a Windows system,
 // including system details, installed runtimes, network configurations, and Windows services.
 //
-// The main entry point is ProvideInventoryInsight() for customizable insights.
+// The main entry point is ProvideInsights() for customizable insights.
 //
 // Example:
 //
@@ -13,7 +13,7 @@
 //		EnableNetwork: true,
 //		EnableWindowsServices: true,
 //	}
-//	insights, err := ProvideInventoryInsight(options)
+//	insights, err := ProvideInsights(options)
 //	if err != nil {
 //	    log.Fatal(err)
 //	}
@@ -30,13 +30,6 @@ import (
 	"github.com/miroslav-matejovsky/winii/system"
 	"github.com/miroslav-matejovsky/winii/winservices"
 )
-
-// ProvideInventoryInsight allows gathering inventory insights with custom options.
-// The options parameter specifies which insights to include and how to filter them.
-// It returns a pointer to an Insights struct or an error if gathering fails.
-func ProvideInventoryInsight(options InsightsOptions) (*Insights, error) {
-	return ProvideInsights(options)
-}
 
 // InsightsOptions configures the gathering of inventory insights.
 // It allows customizing which components to include and how to filter Windows services.
